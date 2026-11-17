@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F7F6F3">
+<title>每日海报 · 赫眉 HYMN</title>
+<link rel="icon" href="assets/logo-ink.png">
+<style>
+  /* 2026-11-17 用户：陈列照 savee.com（图片铺满、错落、不写说明，鼠标放上去才出按钮；点开看大图）；
+     同日改：不要黑底 → 白色系 + 苹果风格的玻璃大泡泡在背景慢慢飘（两三个超大的就行） */
+  :root {
+    --bg: #F7F6F3; --card: #ECEAE5; --t1: #16140F; --t2: rgba(22,20,15,.62); --t3: rgba(22,20,15,.42);
+    --line: rgba(22,20,15,.08); --pink: #B9808B;
+    --sans: -apple-system, "SF Pro Text", "PingFang SC", system-ui, sans-serif;
+    --rail: 66px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { background: var(--bg); }
+  body { background: radial-gradient(1100px 800px at 12% 8%, #FBEFF2 0, rgba(251,239,242,0) 62%), radial-gradient(1000px 900px at 92% 85%, #EDF1FA 0, rgba(237,241,250,0) 60%), var(--bg); background-attachment: fixed; }
+
+  /* 背景玻璃泡泡：只动 transform（GPU 合成），不用 canvas / 模糊滤镜逐帧画（机器性能有限） */
+  .bubs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .bubs i { position: absolute; border-radius: 50%; will-change: transform; border: 1.5px solid rgba(255,255,255,.75);
+    background:
+      radial-gradient(circle at 30% 24%, rgba(255,255,255,.95) 0, rgba(255,255,255,.5) 3.5%, rgba(255,255,255,0) 12%),
+      radial-gradient(circle at 72% 80%, rgba(255,255,255,.55) 0, rgba(255,255,255,0) 14%),
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,.04) 0, rgba(255,255,255,.1) 60%, rgba(255,255,255,0) 71%);
+    box-shadow: inset 0 0 90px rgba(255,255,255,.7), inset 60px -70px 160px rgba(170,195,255,.45), inset -70px 60px 160px rgba(255,185,212,.48),
+      inset 0 -30px 80px rgba(255,228,180,.35), 0 60px 140px -50px rgba(110,100,140,.3); }
+  /* 泡泡边缘一圈彩虹反光（苹果玻璃那种）+ 左上一块高光 */
+  .bubs i::before { content: ""; position: absolute; inset: -1px; border-radius: 50%;
+    background: conic-gradient(from 200deg, rgba(255,170,200,.85), rgba(255,226,170,.8), rgba(170,240,220,.75), rgba(160,190,255,.85), rgba(220,170,255,.8), rgba(255,170,200,.85));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 2px)); opacity: .85; }
+  .bubs i::after { content: ""; position: absolute; left: 14%; top: 9%; width: 34%; height: 20%; border-radius: 50%; transform: rotate(-28deg);
+    background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+  .bubs .b1 { width: 58vmax; height: 58vmax; left: -10vmax; top: -14vmax; animation: fl1 38s ease-in-out infinite alternate; }
+  .bubs .b2 { width: 44vmax; height: 44vmax; right: -8vmax; top: 30vh; animation: fl2 46s ease-in-out infinite alternate; }
+  .bubs .b3 { width: 30vmax; height: 30vmax; left: 42vw; bottom: -12vmax; animation: fl3 32s ease-in-out infinite alternate; }
+  @keyframes fl1 { to { transform: translate(8vw, 6vh) scale(1.05) rotate(14deg); } }
+  @keyframes fl2 { to { transform: translate(-10vw, -8vh) scale(.94) rotate(-18deg); } }
+  @keyframes fl3 { to { transform: translate(-14vw, -16vh) scale(1.08) rotate(22deg); } }
+  @media (prefers-reduced-motion: reduce) { .bubs i { animation: none; } }
+  .rail, .wall { position: relative; z-index: 1; }
+  body { color: var(--t1); font: 14px/1.6 var(--sans); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  button, input { font: inherit; color: inherit; background: none; border: 0; }
+  button { cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+
+  /* 左边一条细栏：只放 logo 和栏目名 */
+  .rail { position: fixed; left: 0; top: 0; bottom: 0; width: var(--rail); display: flex; flex-direction: column; align-items: center; padding: 26px 0; z-index: 5; }
+  /* logo 竖着放（横着塞进细栏只有 10px 高） */
+  .rail .mkw { width: 30px; height: 124px; position: relative; }
+  .rail .mk { width: 124px; display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(90deg); }
+  .rail .nm { margin-top: 30px; writing-mode: vertical-rl; letter-spacing: .5em; font-size: 12px; color: var(--t3); }
+  .rail .ct { margin-top: auto; font-size: 11px; color: var(--t3); text-align: center; line-height: 1.4; }
+
+  /* 图片墙：错落的层次（2026-11-17 用户：savee 那种交错）——脚本把海报按 1、2、3… 依次分进几列（横着看日期还是顺的），每列往下错开不同距离 */
+  .wall { margin-left: var(--rail); padding: 26px 44px 140px 12px; display: flex; gap: 44px; align-items: flex-start; }
+  .wall .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 44px; }
+  .card { position: relative; cursor: zoom-in; background: var(--card); display: block; box-shadow: 0 22px 48px -24px rgba(60,45,35,.32), 0 2px 6px rgba(60,45,35,.06); }
+  .card img { width: 100%; display: block; aspect-ratio: 1086 / 1448; object-fit: cover; }
+  /* 悬停浮出的液态玻璃（2026-11-17 用户：照苹果控制中心的玻璃效果；标题只在鼠标放上去时出现） */
+  .card .ov { position: absolute; inset: 0; opacity: 0; transition: opacity .22s ease; pointer-events: none; }
+  .card:hover .ov { opacity: 1; pointer-events: auto; }
+  /* 2026-11-17 用户：玻璃要跟录屏软件里那种一样（mac-recorder/Overlays.swift 的 lens + drawGlassChrome）：
+     中间几乎不糊、清清楚楚；越靠边越像透镜，把后面的画面放大、顺着胶囊形状弯过去；没有描边线；
+     浮起的柔影 + 边缘往里渐淡的内阴影 + 上沿一道柔光；颜色稍微提一点饱和和亮度。
+     折射用 SVG 位移滤镜（脚本按胶囊尺寸现算位移图，见 lensFor），Chrome 支持；不支持的浏览器退回轻微模糊 */
+  .lq { color: #1C1C1E; border-radius: 999px; background: rgba(255,255,255,.55);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15) brightness(1.06); backdrop-filter: blur(14px) saturate(1.15) brightness(1.06);
+    box-shadow: 0 8px 22px -6px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.08),
+      inset 0 -2px 5px rgba(0,0,0,.12), inset 0 0 3px rgba(0,0,0,.08), inset 0 1.5px 1.5px -0.5px rgba(255,255,255,.9);
+    transform: translateY(8px) scale(.97); transition: transform .32s cubic-bezier(.2,.9,.25,1.25); }
+  .card:hover .lq { transform: none; }
+  .lqt { position: absolute; left: 12px; right: 12px; bottom: 12px; padding: 11px 22px 12px; border-radius: 30px; }
+  .lqt b { display: block; font-size: 15px; font-weight: 700; color: #111; letter-spacing: .01em; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 8px rgba(255,255,255,.7); }
+  .lqt span { display: block; font-size: 12px; font-weight: 500; color: rgba(17,17,17,.68); margin-top: 1px; text-shadow: 0 0 6px rgba(255,255,255,.7); }
+  .lqb { height: 36px; padding: 0 16px; display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; white-space: nowrap; text-shadow: 0 0 6px rgba(255,255,255,.7); }
+  .lqb:hover { background: rgba(255,255,255,.3); }
+  .ov .dt { position: absolute; left: 14px; top: 12px; font-size: 13px; font-weight: 600; text-shadow: 0 1px 6px rgba(0,0,0,.4); }
+  .ov .tt { position: absolute; left: 14px; right: 14px; bottom: 12px; font-size: 13px; color: rgba(255,255,255,.9); }
+  .pill { height: 34px; padding: 0 16px; border-radius: 17px; background: #fff; color: #111; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+  .pill.ghost { background: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .pill:active { transform: scale(.97); }
+  .ov .acts { position: absolute; right: 12px; top: 12px; display: flex; gap: 8px; }
+  /* 今天：一直看得见的小标 */
+  .card .today { position: absolute; right: 12px; top: 12px; height: 28px; padding: 0 13px; font-size: 12px; font-weight: 600; display: flex; align-items: center; transform: none; transition: opacity .18s; }
+  .card:hover .today { opacity: 0; }
+    .item.past { opacity: .62; transition: opacity .2s; }
+  .item.past:hover { opacity: 1; }
+  /* 图下的日期 + 标题（2026-11-17 用户：图片标题怎么没了） */
+  /* 2026-11-17 用户：原来灰字 + 黑体加粗太丑、跟泡泡不搭 → 磨砂玻璃小卡 + 宋体标题（跟海报上的字一个调子） */
+  .glass { background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.85); border-radius: 16px;
+    box-shadow: 0 10px 28px -14px rgba(90,70,90,.28), inset 0 1px 0 rgba(255,255,255,.9);
+    backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
+  .cap { margin-top: 14px; padding: 10px 14px 11px; cursor: pointer; }
+  .cap .cd { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: .12em; color: rgba(22,20,15,.45); }
+  .cap .cd b { font-weight: 500; letter-spacing: .08em; color: #fff; background: linear-gradient(135deg, #E9A9B6, #C49ACF); border-radius: 8px; padding: 0 7px; line-height: 17px; }
+  .cap .ct { display: block; font-family: "Songti SC", "STSong", "Noto Serif SC", serif; font-size: 16px; font-weight: 600; color: #3B3029; margin-top: 3px; line-height: 1.4; letter-spacing: .02em; }
+  .empty { padding: 80px 20px; color: var(--t3); text-align: center; flex: 1; }
+
+  /* 底部浮着的搜索条 */
+  .find { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); width: min(420px, calc(100vw - 40px)); height: 50px; border-radius: 25px;
+    background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 12px 34px -12px rgba(60,45,35,.25);
+    backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); display: flex; align-items: center; gap: 10px; padding: 0 20px; z-index: 6; }
+  .find svg { flex: none; opacity: .55; }
+  .find input { flex: 1; min-width: 0; height: 100%; outline: none; font-size: 15px; -webkit-appearance: none; appearance: none; }
+  .find input::placeholder { color: var(--t3); }
+
+  /* 看大图（2026-11-17 用户：点开要 savee 那样——顶上一条：左边返回，右边按钮；中间大图；往下滑是别的海报） */
+  /* 详情页透明底，后面的海报墙藏起来，背景泡泡照样飘（2026-11-17 用户：点开后背景特效怎么没了） */
+  .lb { position: fixed; inset: 0; z-index: 20; display: none; overflow-y: auto; overscroll-behavior: contain; background: transparent; }
+  body.lbopen .wall, body.lbopen .rail, body.lbopen .find { visibility: hidden; }
+  .lb.on { display: block; }
+  .lb .bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 16px 28px; }
+  .lb .back { width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 26px; line-height: 1; color: #3B3029; flex: none; }
+  .lb .back:hover { background: rgba(255,255,255,.75); }
+  .lb .who { min-width: 0; padding: 7px 18px 8px; }
+  .lb .who .d { font-size: 11px; letter-spacing: .12em; color: rgba(22,20,15,.45); }
+  .lb .who .d b { font-weight: 500; color: #fff; background: linear-gradient(135deg, #E9A9B6, #C49ACF); border-radius: 8px; padding: 0 7px; margin-left: 6px; letter-spacing: .08em; }
+  .lb .who h2 { font-family: "Songti SC", "STSong", "Noto Serif SC", serif; font-size: 17px; font-weight: 600; color: #3B3029; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lb .btns .pill.ghost { background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.85); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .lb .btns { margin-left: auto; display: flex; gap: 8px; flex: none; }
+  .lb .pill { background: #16140F; color: #fff; height: 36px; border-radius: 18px; }
+  .lb .pill.ghost { background: rgba(22,20,15,.06); color: var(--t1); backdrop-filter: none; }
+  .lb .stage { display: flex; justify-content: center; padding: 18px 28px 0; }
+  .lb .stage img { display: block; max-width: 100%; height: calc(100vh - 170px); width: auto; aspect-ratio: 1086 / 1448; object-fit: contain;
+    box-shadow: 0 34px 80px -34px rgba(60,45,35,.45), 0 2px 8px rgba(60,45,35,.06); background: var(--card); }
+  .lb .tip { text-align: center; font-size: 12px; color: var(--t3); margin-top: 16px; }
+  .lb .more { padding: 64px 28px 60px; }
+  .lb .more h3 { font-size: 13px; font-weight: 600; color: var(--t2); margin-bottom: 18px; }
+  .lb .more .row { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 24px; }
+  .lb .more figure { cursor: pointer; }
+  .lb .more figure img { width: 100%; aspect-ratio: 1086 / 1448; object-fit: cover; display: block; box-shadow: 0 14px 30px -16px rgba(60,45,35,.35); transition: transform .2s; }
+  .lb .more figure:hover img { transform: translateY(-4px); }
+  .lb .more figcaption { font-size: 12px; color: var(--t3); margin-top: 8px; }
+
+  .toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); background: #16140F; color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 30; }
+  .toast.on { opacity: 1; }
+
+  .phone { display: none; }
+  @media (max-width: 860px) {
+    :root { --rail: 0px; }
+    .rail { position: static; width: auto; flex-direction: row; padding: 16px 16px 6px; }
+    .rail .mkw { width: auto; height: auto; }
+    .rail .mk { width: 84px; position: static; transform: none; }
+    .rail .nm { writing-mode: horizontal-tb; margin: 0 0 0 14px; letter-spacing: .3em; }
+    .rail .ct { margin: 0 0 0 auto; }
+    .wall { padding: 10px 12px 110px; gap: 12px; }
+    .wall .col { gap: 12px; }
+    .card { box-shadow: 0 12px 26px -14px rgba(60,45,35,.3); }
+    .card { cursor: pointer; }
+    .card .ov { display: none; }
+    .card:hover .today { opacity: 1; }
+    .item.past { opacity: .75; }
+    .cap { margin-top: 8px; }
+    .cap .ct { font-size: 13px; }
+    .lb .bar { padding: 12px 12px; gap: 8px; }
+    .lb .who h2 { font-size: 14px; }
+    .lb .stage { padding: 6px 12px 0; }
+    .lb .stage img { height: auto; width: 100%; max-height: none; }
+    .lb .more { padding: 40px 12px 50px; }
+    .lb .more .row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .desk { display: none !important; }
+    .phone { display: inline-flex; }
+    p.phone { display: block; }
+    .find { bottom: calc(18px + env(safe-area-inset-bottom)); height: 46px; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="lensDefs"></defs></svg>
+<div class="bubs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+<aside class="rail">
+  <span class="mkw"><img class="mk" src="assets/logo-ink.png" alt="赫眉 HYMN"></span>
+  <span class="nm">每日海报</span>
+  <span class="ct" id="cnt"></span>
+</aside>
+<main class="wall" id="wall"></main>
+<label class="find"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#16140F" stroke-width="1.8"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L18 18"/></svg><input id="q" type="search" placeholder="搜标题或日期，比如 防晒 / 11月20" autocomplete="off"></label>
+
+<div class="lb" id="lb">
+  <div class="bar">
+    <button class="back glass" id="lbX" type="button" aria-label="返回">‹</button>
+    <div class="who glass"><div class="d" id="lbDate"></div><h2 id="lbTitle"></h2></div>
+    <div class="btns">
+      <button class="pill ghost desk" id="lbCopy" type="button">复制图片</button>
+      <a class="pill desk" id="lbDl" download>下载原图</a>
+      <button class="pill phone" id="lbSave" type="button">保存到相册</button>
+    </div>
+  </div>
+  <div class="stage"><img id="lbImg" alt=""></div>
+  <p class="tip desk">「复制图片」后到微信里粘贴就能发 · ← → 看前后一天 · Esc 返回</p>
+  <p class="tip phone">点「保存到相册」选「存储图像」；在微信里打开的，长按图片保存</p>
+  <div class="more"><h3>其他日子</h3><div class="row" id="lbMore"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="data/posters.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s) { return document.querySelector(s); };
+  var WD = '日一二三四五六';
+  var list = (window.DAILY || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+  var today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);   // 北京时间
+  var md = function (d) { return Number(d.slice(5, 7)) + '月' + Number(d.slice(8)) + '日 周' + WD[new Date(d + 'T00:00:00Z').getUTCDay()]; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var phone = window.matchMedia('(max-width: 860px)');
+
+  // 排序：今天 → 往后的日子 → 已经过去的（最近的在前）
+  var order = list.filter(function (x) { return x.date >= today; }).concat(list.filter(function (x) { return x.date < today; }).reverse());
+  $('#cnt').textContent = list.length + ' 张';
+
+  function draw() {
+    var q = $('#q').value.trim().replace(/\s+/g, '');
+    var hit = order.filter(function (x) {
+      if (!q) return true;
+      var key = x.title + md(x.date) + x.date + x.date.slice(5).replace('-', '/') + Number(x.date.slice(5, 7)) + '月' + Number(x.date.slice(8));
+      return key.replace(/\s+/g, '').indexOf(q) >= 0;
+    });
+    var cards = hit.map(function (x) {
+      return '<div class="item' + (x.date < today ? ' past' : '') + '"><figure class="card" data-d="' + x.date + '">' +
+        '<img loading="lazy" src="' + x.img + '" alt="' + esc(x.title) + '">' +
+        (x.date === today ? '<span class="today lq">今天</span>' : '') +
+        '<div class="ov"><span class="acts"><button class="lq lqb" data-copy="1" type="button">复制图片</button><a class="lq lqb" data-dl="1" href="' + x.img + '" download="赫眉每日海报-' + x.date + '.jpg">下载</a></span>' +
+        '<div class="lq lqt"><b>' + esc(x.title) + '</b><span>' + md(x.date) + (x.date === today ? ' · 今天' : '') + '</span></div></div>' +
+        '</figure></div>';
+    });
+    if (!cards.length) { $('#wall').innerHTML = '<p class="empty">没有找到「' + esc(q) + '」</p>'; return; }
+    // 第 i 张放进第 i % n 列，每列往下错开不同距离 → 交错的层次，横着看日期还是 17、18、19…
+    var n = nCols(), cols = [];
+    for (var i = 0; i < n; i++) cols.push([]);
+    cards.forEach(function (h, i) { cols[i % n].push(h); });
+    var off = phone.matches ? [0, 56] : [0, 96, 34, 150, 62, 120, 18];
+    $('#wall').innerHTML = cols.map(function (c, i) { return '<div class="col" style="padding-top:' + off[i % off.length] + 'px">' + c.join('') + '</div>'; }).join('');
+    draw.n = n;
+  }
+  function nCols() { if (phone.matches) return 2; var w = $('#wall').clientWidth - 56; return Math.max(2, Math.min(7, Math.floor((w + 44) / (250 + 44)))); }
+  window.addEventListener('resize', function () { if (nCols() !== draw.n) draw(); clearTimeout(window.__lt); window.__lt = setTimeout(applyLens, 150); });
+  /* 玻璃透镜：照录屏的 lensKernel —— 圆角矩形距离场，离边 d < edge 的点往外取 depth·t² 远的背景（t = 1 - d/edge），
+     中间不动。位移图写进 R/G 通道（128 = 不动），SVG feDisplacementMap 用它去扭后面的画面 */
+  var LENS = {}, NS = 'http://www.w3.org/2000/svg';
+  function lensFor(w, h) {
+    w = Math.round(w); h = Math.round(h); if (w < 4 || h < 4) return '';
+    var key = 'lq' + w + 'x' + h; if (LENS[key]) return key;
+    var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    var g = cv.getContext('2d'), im = g.createImageData(w, h), D = im.data;
+    var s = Math.min(w, h), rad = s / 2, edge = s * 0.5, depth = s * 0.4, cx = w / 2, cy = h / 2;
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var px = x + .5 - cx, py = y + .5 - cy, qx = Math.abs(px) - (w / 2 - rad), qy = Math.abs(py) - (h / 2 - rad);
+      var ox = Math.max(qx, 0), oy = Math.max(qy, 0), d = -(Math.sqrt(ox * ox + oy * oy) + Math.min(Math.max(qx, qy), 0) - rad);
+      var nx = 0, ny = 0, t = 0;
+      if (d > 0) {
+        if (qx > 0 && qy > 0) { var l = Math.sqrt(qx * qx + qy * qy) || 1; nx = qx / l; ny = qy / l; } else if (qx > qy) nx = 1; else ny = 1;
+        nx *= px < 0 ? -1 : 1; ny *= py < 0 ? -1 : 1;
+        t = Math.min(1, Math.max(0, 1 - d / edge)); t *= t;
+      }
+      var k = (y * w + x) * 4; D[k] = 128 + nx * t * 127; D[k + 1] = 128 + ny * t * 127; D[k + 2] = 128; D[k + 3] = 255;
+    }
+    g.putImageData(im, 0, 0);
+    var f = document.createElementNS(NS, 'filter');
+    f.setAttribute('id', key); f.setAttribute('x', '0'); f.setAttribute('y', '0'); f.setAttribute('width', w); f.setAttribute('height', h);
+    f.setAttribute('filterUnits', 'userSpaceOnUse'); f.setAttribute('primitiveUnits', 'userSpaceOnUse'); f.setAttribute('color-interpolation-filters', 'sRGB');
+    f.innerHTML = '<feImage href="' + cv.toDataURL() + '" x="0" y="0" width="' + w + '" height="' + h + '" result="m"/>' +
+      '<feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>' +
+      '<feDisplacementMap in="b" in2="m" scale="' + (depth * 2).toFixed(1) + '" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
+      '<feColorMatrix in="d" type="saturate" values="1.15" result="s"/>' +
+      '<feComponentTransfer in="s"><feFuncR type="linear" slope="1.035"/><feFuncG type="linear" slope="1.035"/><feFuncB type="linear" slope="1.035"/></feComponentTransfer>';
+    $('#lensDefs').appendChild(f); LENS[key] = 1; return key;
+  }
+  var CAN_LENS = /Chrome\//.test(navigator.userAgent);   // Chrome / Edge 支持 backdrop-filter 里用 SVG 滤镜
+  function applyLens() {
+    if (!CAN_LENS) return;
+    document.querySelectorAll('.lq').forEach(function (el) {
+      var id = lensFor(el.offsetWidth, el.offsetHeight); if (!id) return;
+      var v = 'url(#' + id + ')'; el.style.backdropFilter = v; el.style.webkitBackdropFilter = v;
+    });
+  }
+  draw(); applyLens();
+  $('#q').addEventListener('input', function () { draw(); applyLens(); });
+
+  function toast(t) { var el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('on'); }, 1800); }
+
+  // 复制图片：剪贴板只收 PNG，先画到 canvas 转一下（本地双击打开时浏览器不让，上线后可以）
+  function pngBlob(src) {
+    return new Promise(function (ok, no) {
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      im.onload = function () {
+        var c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+        c.getContext('2d').drawImage(im, 0, 0);
+        try { c.toBlob(function (b) { b ? ok(b) : no(); }, 'image/png'); } catch (e) { no(e); }
+      };
+      im.onerror = no; im.src = src;
+    });
+  }
+  function copyImg(x) {
+    if (!window.ClipboardItem || !navigator.clipboard || !navigator.clipboard.write) { toast('这个浏览器不支持复制图片，请点「下载」'); return; }
+    navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob(x.img) })])
+      .then(function () { toast('已复制，去微信里粘贴就能发'); }, function () { toast(location.protocol === 'file:' ? '本地打开复制不了图片，上线后就可以' : '复制失败，请点「下载」'); });
+  }
+
+  /* 看大图 */
+  var cur = null;
+  function byDate(d) { return list.filter(function (x) { return x.date === d; })[0]; }
+  function open(x) {
+    cur = x;
+    $('#lbImg').src = x.img; $('#lbImg').alt = x.title;
+    $('#lbDate').innerHTML = md(x.date) + (x.date === today ? '<b>今天</b>' : '');
+    $('#lbTitle').textContent = x.title;
+    $('#lbDl').href = x.img; $('#lbDl').setAttribute('download', '赫眉每日海报-' + x.date + '.jpg');
+    $('#lbMore').innerHTML = order.filter(function (y) { return y !== x; }).map(function (y) {
+      return '<figure data-d="' + y.date + '"><img loading="lazy" src="' + y.img + '" alt=""><figcaption>' + md(y.date) + (y.date === today ? ' · 今天' : '') + '</figcaption></figure>';
+    }).join('');
+    $('#lb').classList.add('on'); $('#lb').scrollTop = 0; document.body.style.overflow = 'hidden'; document.body.classList.add('lbopen');
+    history.replaceState(null, '', '?d=' + x.date);
+  }
+  function close() { $('#lb').classList.remove('on'); document.body.style.overflow = ''; document.body.classList.remove('lbopen'); cur = null; history.replaceState(null, '', location.pathname); }
+  function step(n) { if (!cur) return; var x = list[list.indexOf(cur) + n]; if (x) open(x); }
+
+  $('#wall').addEventListener('click', function (e) {
+    var c = e.target.closest('.card'); if (!c) return;
+    var x = byDate(c.dataset.d);
+    if (e.target.closest('[data-dl]')) return;   // 下载链接自己处理
+    if (e.target.closest('[data-copy]')) { copyImg(x); return; }
+    open(x);
+  });
+  $('#lbX').addEventListener('click', close);
+  $('#lbMore').addEventListener('click', function (e) { var f = e.target.closest('figure'); if (f) open(byDate(f.dataset.d)); });
+  $('#lbCopy').addEventListener('click', function () { cur && copyImg(cur); });
+  document.addEventListener('keydown', function (e) {
+    if (!cur) return;
+    if (e.key === 'Escape') close(); else if (e.key === 'ArrowLeft') step(-1); else if (e.key === 'ArrowRight') step(1);
+  });
+  // 手机保存：系统分享面板里选「存储图像」进相册（iPhone 上直接 download 会进「文件」）；不支持的（如微信内置浏览器）提示长按
+  $('#lbSave').addEventListener('click', function () {
+    if (!cur) return;
+    fetch(cur.img).then(function (r) { return r.blob(); }).then(function (b) {
+      var f = new File([b], '赫眉每日海报-' + cur.date + '.jpg', { type: 'image/jpeg' });
+      if (!(navigator.canShare && navigator.canShare({ files: [f] }))) throw new Error('noshare');
+      return navigator.share({ files: [f] });
+    }).catch(function (e) { if (!(e && e.name === 'AbortError')) toast('长按图片就能保存到相册'); });
+  });
+
+  // 带 ?d=日期 打开（门店 app 推送的链接）就直接看那一天
+  var want = byDate((location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/) || [])[1]);
+  if (want) open(want);
+})();
+</script>
+</body>
+</html>
