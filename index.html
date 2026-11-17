@@ -116,10 +116,12 @@
   .lb.on { display: block; }
   .lb .bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 16px 28px; }
   .lb .back { width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 26px; line-height: 1; color: #3B3029; flex: none; }
-  .lb .back:hover { background: rgba(255,255,255,.75); }
   .lb .who { min-width: 0; padding: 8px 26px 9px; }
   /* 2026-11-17 用户：返回键 + 日期标题这两块也换成卡片上那种透镜玻璃（.lq），这里不需要卡片 hover 的上浮动画 */
-  .lb .lq { transform: none; }
+  .lb .lq { transform: none; transition: background .2s, transform .32s cubic-bezier(.2,.9,.25,1.25); }
+  /* 鼠标放上去：跟卡片上「复制图片 / 下载」一样变得更通透，再轻轻浮起一点 */
+  .lb .lq:hover { background: rgba(255,255,255,.3); transform: translateY(-2px) scale(1.02); }
+  .lb .back:active { transform: scale(.96); }
   .lb .who h2, .lb .back { text-shadow: 0 0 8px rgba(255,255,255,.7); }
   .lb .who .d { font-size: 11px; letter-spacing: .12em; color: rgba(22,20,15,.45); }
   .lb .who .d b { font-weight: 500; color: #fff; background: linear-gradient(135deg, #E9A9B6, #C49ACF); border-radius: 8px; padding: 0 7px; margin-left: 6px; letter-spacing: .08em; }
