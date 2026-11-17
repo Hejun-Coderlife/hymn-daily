@@ -117,7 +117,10 @@
   .lb .bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 16px 28px; }
   .lb .back { width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 26px; line-height: 1; color: #3B3029; flex: none; }
   .lb .back:hover { background: rgba(255,255,255,.75); }
-  .lb .who { min-width: 0; padding: 7px 18px 8px; }
+  .lb .who { min-width: 0; padding: 8px 26px 9px; }
+  /* 2026-11-17 用户：返回键 + 日期标题这两块也换成卡片上那种透镜玻璃（.lq），这里不需要卡片 hover 的上浮动画 */
+  .lb .lq { transform: none; }
+  .lb .who h2, .lb .back { text-shadow: 0 0 8px rgba(255,255,255,.7); }
   .lb .who .d { font-size: 11px; letter-spacing: .12em; color: rgba(22,20,15,.45); }
   .lb .who .d b { font-weight: 500; color: #fff; background: linear-gradient(135deg, #E9A9B6, #C49ACF); border-radius: 8px; padding: 0 7px; margin-left: 6px; letter-spacing: .08em; }
   .lb .who h2 { font-family: "Songti SC", "STSong", "Noto Serif SC", serif; font-size: 17px; font-weight: 600; color: #3B3029; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -193,8 +196,8 @@
 
 <div class="lb" id="lb">
   <div class="bar">
-    <button class="back glass" id="lbX" type="button" aria-label="返回">‹</button>
-    <div class="who glass"><div class="d" id="lbDate"></div><h2 id="lbTitle"></h2></div>
+    <button class="back lq" id="lbX" type="button" aria-label="返回">‹</button>
+    <div class="who lq"><div class="d" id="lbDate"></div><h2 id="lbTitle"></h2></div>
     <div class="btns">
       <button class="pill ghost desk" id="lbCopy" type="button">复制图片</button>
       <a class="pill desk" id="lbDl" download>下载原图</a>
@@ -332,6 +335,7 @@
     }).join('');
     $('#lb').classList.add('on'); $('#lb').scrollTop = 0; document.body.style.overflow = 'hidden'; document.body.classList.add('lbopen');
     history.replaceState(null, '', '?d=' + x.date);
+    applyLens();   // 标题长短不同，胶囊尺寸跟着变，透镜要按新尺寸算
   }
   function close() { $('#lb').classList.remove('on'); document.body.style.overflow = ''; document.body.classList.remove('lbopen'); cur = null; history.replaceState(null, '', location.pathname); }
   function step(n) { if (!cur) return; var x = list[list.indexOf(cur) + n]; if (x) open(x); }
