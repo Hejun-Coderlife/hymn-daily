@@ -272,12 +272,7 @@ window.DAILY = [
  },
  {
   "date": "2027-01-10",
-  "title": "周末，给皮肤放个假",
-  "img": "posters/2027-01-10.jpg"
- },
- {
-  "date": "2027-01-11",
   "title": "晨间护肤三步走",
-  "img": "posters/2027-01-11.jpg"
+  "img": "posters/2027-01-10.jpg"
  }
 ];
