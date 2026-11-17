@@ -120,6 +120,7 @@
   /* 2026-11-17 用户：返回键 + 日期标题这两块也换成卡片上那种透镜玻璃（.lq），这里不需要卡片 hover 的上浮动画 */
   .lb .lq { transform: none; transition: background .2s, transform .32s cubic-bezier(.2,.9,.25,1.25); }
   /* 鼠标放上去：跟卡片上「复制图片 / 下载」一样变得更通透，再轻轻浮起一点 */
+  .lb .btns .lqb { height: 40px; padding: 0 20px; font-size: 13.5px; cursor: pointer; text-decoration: none; }   /* 右上角按钮也用卡片上那种透镜玻璃（2026-11-17 用户） */
   .lb .lq:hover { background: rgba(255,255,255,.3); transform: translateY(-2px) scale(1.02); }
   .lb .back:active { transform: scale(.96); }
   .lb .who h2, .lb .back { text-shadow: 0 0 8px rgba(255,255,255,.7); }
@@ -201,9 +202,9 @@
     <button class="back lq" id="lbX" type="button" aria-label="返回">‹</button>
     <div class="who lq"><div class="d" id="lbDate"></div><h2 id="lbTitle"></h2></div>
     <div class="btns">
-      <button class="pill ghost desk" id="lbCopy" type="button">复制图片</button>
-      <a class="pill desk" id="lbDl" download>下载原图</a>
-      <button class="pill phone" id="lbSave" type="button">保存到相册</button>
+      <button class="lq lqb desk" id="lbCopy" type="button">复制图片</button>
+      <a class="lq lqb desk" id="lbDl" download>下载原图</a>
+      <button class="lq lqb phone" id="lbSave" type="button">保存到相册</button>
     </div>
   </div>
   <div class="stage"><img id="lbImg" alt="">
