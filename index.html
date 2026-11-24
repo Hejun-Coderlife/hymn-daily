@@ -226,6 +226,8 @@
   var list = (window.DAILY || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
   var today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);   // 北京时间
   var md = function (d) { return Number(d.slice(5, 7)) + '月' + Number(d.slice(8)) + '日 周' + WD[new Date(d + 'T00:00:00Z').getUTCDay()]; };
+  // 一天可以多张（2026-11-24 平安夜 / 圣诞节各两张）：每张用图片文件名当编号（2026-12-24、2026-12-24-2），不再只按日期
+  var stem = function (x) { return x.img.replace(/^.*\//, '').replace(/\.\w+$/, ''); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var phone = window.matchMedia('(max-width: 860px)');
 
@@ -241,10 +243,10 @@
       return key.replace(/\s+/g, '').indexOf(q) >= 0;
     });
     var cards = hit.map(function (x) {
-      return '<div class="item' + (x.date < today ? ' past' : '') + '"><figure class="card" data-d="' + x.date + '">' +
+      return '<div class="item' + (x.date < today ? ' past' : '') + '"><figure class="card" data-k="' + stem(x) + '">' +
         '<img loading="lazy" src="' + x.img + '" alt="' + esc(x.title) + '">' +
         (x.date === today ? '<span class="today lq">今天</span>' : '') +
-        '<div class="ov"><span class="acts"><button class="lq lqb" data-copy="1" type="button">复制图片</button><a class="lq lqb" data-dl="1" href="' + x.img + '" download="赫眉每日海报-' + x.date + '.jpg">下载</a></span>' +
+        '<div class="ov"><span class="acts"><button class="lq lqb" data-copy="1" type="button">复制图片</button><a class="lq lqb" data-dl="1" href="' + x.img + '" download="赫眉每日海报-' + stem(x) + '.jpg">下载</a></span>' +
         '<div class="lq lqt"><b>' + esc(x.title) + '</b><span>' + md(x.date) + (x.date === today ? ' · 今天' : '') + '</span></div></div>' +
         '</figure></div>';
     });
@@ -324,20 +326,21 @@
   /* 看大图 */
   var cur = null;
   function byDate(d) { return list.filter(function (x) { return x.date === d; })[0]; }
+  function byKey(k) { return list.filter(function (x) { return stem(x) === k; })[0] || byDate(k); }
   function open(x) {
     cur = x;
     $('#lbImg').src = x.img; $('#lbImg').alt = x.title;
     $('#lbDate').innerHTML = md(x.date) + (x.date === today ? '<b>今天</b>' : '');
     $('#lbTitle').textContent = x.title;
     // 二维码一律指向线上地址（本地双击打开时也能扫）
-    try { var q = qrcode(0, 'M'); q.addData('https://hejun-coderlife.github.io/hymn-daily/?d=' + x.date); q.make();
+    try { var q = qrcode(0, 'M'); q.addData('https://hejun-coderlife.github.io/hymn-daily/?d=' + stem(x)); q.make();
       $('#lbQr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) { $('#lbQr').innerHTML = ''; }
-    $('#lbDl').href = x.img; $('#lbDl').setAttribute('download', '赫眉每日海报-' + x.date + '.jpg');
+    $('#lbDl').href = x.img; $('#lbDl').setAttribute('download', '赫眉每日海报-' + stem(x) + '.jpg');
     $('#lbMore').innerHTML = order.filter(function (y) { return y !== x; }).map(function (y) {
-      return '<figure data-d="' + y.date + '"><img loading="lazy" src="' + y.img + '" alt=""><figcaption>' + md(y.date) + (y.date === today ? ' · 今天' : '') + '</figcaption></figure>';
+      return '<figure data-k="' + stem(y) + '"><img loading="lazy" src="' + y.img + '" alt=""><figcaption>' + md(y.date) + (y.date === today ? ' · 今天' : '') + '</figcaption></figure>';
     }).join('');
     $('#lb').classList.add('on'); $('#lb').scrollTop = 0; document.body.style.overflow = 'hidden'; document.body.classList.add('lbopen');
-    history.replaceState(null, '', '?d=' + x.date);
+    history.replaceState(null, '', '?d=' + stem(x));
     applyLens();   // 标题长短不同，胶囊尺寸跟着变，透镜要按新尺寸算
   }
   function close() { $('#lb').classList.remove('on'); document.body.style.overflow = ''; document.body.classList.remove('lbopen'); cur = null; history.replaceState(null, '', location.pathname); }
@@ -345,13 +348,13 @@
 
   $('#wall').addEventListener('click', function (e) {
     var c = e.target.closest('.card'); if (!c) return;
-    var x = byDate(c.dataset.d);
+    var x = byKey(c.dataset.k);
     if (e.target.closest('[data-dl]')) return;   // 下载链接自己处理
     if (e.target.closest('[data-copy]')) { copyImg(x); return; }
     open(x);
   });
   $('#lbX').addEventListener('click', close);
-  $('#lbMore').addEventListener('click', function (e) { var f = e.target.closest('figure'); if (f) open(byDate(f.dataset.d)); });
+  $('#lbMore').addEventListener('click', function (e) { var f = e.target.closest('figure'); if (f) open(byKey(f.dataset.k)); });
   $('#lbCopy').addEventListener('click', function () { cur && copyImg(cur); });
   document.addEventListener('keydown', function (e) {
     if (!cur) return;
@@ -361,14 +364,14 @@
   $('#lbSave').addEventListener('click', function () {
     if (!cur) return;
     fetch(cur.img).then(function (r) { return r.blob(); }).then(function (b) {
-      var f = new File([b], '赫眉每日海报-' + cur.date + '.jpg', { type: 'image/jpeg' });
+      var f = new File([b], '赫眉每日海报-' + stem(cur) + '.jpg', { type: 'image/jpeg' });
       if (!(navigator.canShare && navigator.canShare({ files: [f] }))) throw new Error('noshare');
       return navigator.share({ files: [f] });
     }).catch(function (e) { if (!(e && e.name === 'AbortError')) toast('长按图片就能保存到相册'); });
   });
 
   // 带 ?d=日期 打开（门店 app 推送的链接）就直接看那一天
-  var want = byDate((location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/) || [])[1]);
+  var want = byKey((location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2}(?:-\d+)?)/) || [])[1]);
   if (want) open(want);
 })();
 </script>
